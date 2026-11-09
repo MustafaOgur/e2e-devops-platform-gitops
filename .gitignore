@@ -1,0 +1,12 @@
+# Secret'lar ve yerel ayarlar
+.env
+.env.*
+kubeconfig
+*.kubeconfig
+
+# Editör ve işletim sistemi
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
