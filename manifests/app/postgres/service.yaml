@@ -1,0 +1,18 @@
+# Headless Service: StatefulSet pod'una sabit DNS adı verir (postgres-0.postgres)
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: app
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: todo
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres

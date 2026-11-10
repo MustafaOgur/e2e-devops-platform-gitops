@@ -1,4 +1,6 @@
 # Secret'lar ve yerel ayarlar
+# Düz secret'lar sadece yerelde durur; repoya kubeseal ile şifrelenmiş hali girer
+secrets/
 .env
 .env.*
 kubeconfig
