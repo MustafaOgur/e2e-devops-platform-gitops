@@ -1,0 +1,17 @@
+# Image'daki config.js'in yerine geçer; API adresi image yeniden build edilmeden değişir.
+# Tarayıcıda çalıştığı için adres tarayıcının erişebileceği bir adres olmalı.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend
+  namespace: app
+  labels:
+    app.kubernetes.io/name: frontend
+    app.kubernetes.io/component: web
+    app.kubernetes.io/part-of: todo
+data:
+  # Dış erişim kurulana kadar port-forward ile test edilir
+  config.js: |
+    window.APP_CONFIG = {
+      API_URL: "http://localhost:8000",
+    };

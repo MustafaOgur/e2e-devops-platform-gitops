@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: app
+  labels:
+    app.kubernetes.io/name: frontend
+    app.kubernetes.io/component: web
+    app.kubernetes.io/part-of: todo
+spec:
+  selector:
+    app.kubernetes.io/name: frontend
+  # Service standart HTTP portunda dinler, trafiği pod'un 8080 portuna gönderir
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
