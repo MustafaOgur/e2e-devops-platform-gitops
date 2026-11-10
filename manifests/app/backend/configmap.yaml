@@ -1,0 +1,13 @@
+# Gizli olmayan ayarlar; değişmesi image'ı yeniden build etmeyi gerektirmez
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend
+  namespace: app
+  labels:
+    app.kubernetes.io/name: backend
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: todo
+data:
+  # Tarayıcının uygulamayı açtığı adres; dış erişim kurulunca güncellenecek
+  CORS_ORIGINS: http://localhost:3000
