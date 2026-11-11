@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: mustafaoqr/todo-frontend:51f7ba5
+          image: mustafaoqr/todo-frontend:10a1804
           ports:
             - name: http
               containerPort: 8080
