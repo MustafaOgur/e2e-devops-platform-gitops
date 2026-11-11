@@ -20,3 +20,10 @@ spec:
       # Git'ten silinen kaynak cluster'dan da silinir; elle yapılan değişiklik geri alınır
       prune: true
       selfHeal: true
+    # Sıfırdan kurulumda Sealed Secrets henüz hazır değilse senkronizasyon yeniden denenir
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
