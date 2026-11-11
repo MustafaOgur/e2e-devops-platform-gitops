@@ -1,0 +1,20 @@
+# Kök Application (app-of-apps): apps/ klasöründeki tüm Application'ları yönetir.
+# Cluster'a bir kez elle uygulanır: kubectl apply -f bootstrap/root.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/MustafaOgur/e2e-devops-platform-gitops.git
+    targetRevision: main
+    path: apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

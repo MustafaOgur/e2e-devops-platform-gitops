@@ -1,0 +1,28 @@
+# ArgoCD kendini yönetir: chart Helm deposundan, ayarlar bu repodaki values.yaml'dan gelir.
+# Bundan sonra ArgoCD'yi güncellemek için helm upgrade değil, bu dosya veya values.yaml değiştirilir.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://argoproj.github.io/argo-helm
+      chart: argo-cd
+      targetRevision: 10.17.2
+      helm:
+        releaseName: argocd
+        valueFiles:
+          - $values/platform/argocd/values.yaml
+    - repoURL: https://github.com/MustafaOgur/e2e-devops-platform-gitops.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      # ArgoCD'nin kendi kaynaklarını yanlışlıkla silmemesi için prune kapalı
+      prune: false
+      selfHeal: true

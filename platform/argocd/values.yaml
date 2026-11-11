@@ -1,0 +1,52 @@
+configs:
+  params:
+    # TLS ileride Ingress'te sonlandırılacak; ArgoCD sunucusu düz HTTP konuşur
+    server.insecure: true
+
+# SSO kullanılmadığı için gerekmiyor
+dex:
+  enabled: false
+
+# Bildirimler ilerideki bir aşamada açılacak
+notifications:
+  enabled: false
+
+controller:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+
+server:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      memory: 256Mi
+
+repoServer:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      memory: 256Mi
+
+applicationSet:
+  resources:
+    requests:
+      cpu: 25m
+      memory: 32Mi
+    limits:
+      memory: 128Mi
+
+redis:
+  resources:
+    requests:
+      cpu: 25m
+      memory: 32Mi
+    limits:
+      memory: 128Mi

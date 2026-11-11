@@ -3,6 +3,9 @@ kind: Deployment
 metadata:
   name: backend
   namespace: app
+  annotations:
+    # Migration Job'ı (wave 1) bittikten sonra başlar
+    argocd.argoproj.io/sync-wave: "2"
   labels:
     app.kubernetes.io/name: backend
     app.kubernetes.io/component: api

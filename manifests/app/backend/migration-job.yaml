@@ -1,10 +1,15 @@
 # Veritabanı tablolarını oluşturur/günceller, bitince durur.
-# Job'ın pod şablonu değiştirilemez: yeni image ile tekrar çalıştırmak için Job silinip yeniden uygulanır.
+# ArgoCD hook'u: her senkronizasyonda eski Job silinip yenisi çalıştırılır (Job'ın pod şablonu
+# değiştirilemediği için). Wave 1: PostgreSQL (wave 0) hazır olduktan sonra, backend'den (wave 2) önce.
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: backend-migrate
   namespace: app
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+    argocd.argoproj.io/sync-wave: "1"
   labels:
     app.kubernetes.io/name: backend-migrate
     app.kubernetes.io/component: migration
