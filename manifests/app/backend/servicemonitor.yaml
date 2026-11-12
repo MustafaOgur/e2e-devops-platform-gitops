@@ -1,0 +1,21 @@
+# Prometheus, backend Service'inin arkasındaki her pod'un /metrics adresini 30 saniyede bir okur
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: backend
+  namespace: app
+  labels:
+    app.kubernetes.io/name: backend
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: todo
+  annotations:
+    # Sıfırdan kurulumda ServiceMonitor CRD'si henüz yoksa diğer kaynakların senkronizasyonu engellenmez
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: backend
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
