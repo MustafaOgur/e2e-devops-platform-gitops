@@ -9,5 +9,6 @@ metadata:
     app.kubernetes.io/component: api
     app.kubernetes.io/part-of: todo
 data:
-  # Tarayıcının uygulamayı açtığı adres; dış erişim kurulunca güncellenecek
-  CORS_ORIGINS: http://localhost:3000
+  # Uygulama ve API aynı adresten sunulduğu için tarayıcı CORS kontrolü yapmaz;
+  # API başka bir adresten çağrılırsa diye uygulamanın adresi izinli
+  CORS_ORIGINS: http://todo.test

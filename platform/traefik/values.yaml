@@ -1,0 +1,34 @@
+# Traefik Helm chart (traefik/traefik) ayarları.
+# Yönlendirme sadece Gateway API ile yapılır; klasik Ingress ve Traefik'e özel CRD'ler kullanılmaz.
+
+providers:
+  kubernetesGateway:
+    enabled: true
+  kubernetesIngress:
+    enabled: false
+  kubernetesCRD:
+    enabled: false
+
+ingressClass:
+  enabled: false
+
+# Chart'ın oluşturduğu Gateway: tüm cluster'ın tek giriş noktası
+gateway:
+  name: main
+  listeners:
+    web:
+      # Rotalar app, argocd gibi farklı namespace'lerde tanımlanır
+      namespacePolicy:
+        from: All
+
+service:
+  # MetalLB her seferinde aynı IP'yi versin; hosts dosyası bu IP'yi kullanır
+  annotations:
+    metallb.io/loadBalancerIPs: 192.168.56.50
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    memory: 256Mi

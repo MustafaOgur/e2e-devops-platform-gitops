@@ -1,6 +1,10 @@
+global:
+  # Arayüzdeki bağlantılar bu adrese göre oluşturulur
+  domain: argocd.test
+
 configs:
   params:
-    # TLS ileride Ingress'te sonlandırılacak; ArgoCD sunucusu düz HTTP konuşur
+    # Trafik Gateway (Traefik) üzerinden gelir; ArgoCD sunucusu düz HTTP konuşur
     server.insecure: true
 
 # SSO kullanılmadığı için gerekmiyor
@@ -20,6 +24,14 @@ controller:
       memory: 512Mi
 
 server:
+  # http://argocd.test → argocd-server (Gateway API rotası)
+  httproute:
+    enabled: true
+    parentRefs:
+      - name: main
+        namespace: traefik
+    hostnames:
+      - argocd.test
   resources:
     requests:
       cpu: 50m
