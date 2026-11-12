@@ -1,0 +1,23 @@
+# MetalLB Helm chart (metallb/metallb) ayarları.
+# Sadece L2 modu kullanılıyor; BGP bileşenleri (frr, frr-k8s) kapalı.
+
+frrk8s:
+  enabled: false
+
+controller:
+  resources:
+    requests:
+      cpu: 25m
+      memory: 32Mi
+    limits:
+      memory: 128Mi
+
+speaker:
+  frr:
+    enabled: false
+  resources:
+    requests:
+      cpu: 25m
+      memory: 32Mi
+    limits:
+      memory: 128Mi

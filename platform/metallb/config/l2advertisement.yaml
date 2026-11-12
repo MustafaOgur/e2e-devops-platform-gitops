@@ -1,0 +1,12 @@
+# L2 modu: IP, ARP ile host-only ağında duyurulur.
+# NAT kartı (eth0) her VM'de aynı IP'ye sahip olduğu için sadece eth1 kullanılır.
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: default
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+    - default
+  interfaces:
+    - eth1

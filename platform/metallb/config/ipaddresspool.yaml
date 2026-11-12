@@ -1,0 +1,10 @@
+# LoadBalancer Service'lerine verilecek IP'ler.
+# VirtualBox host-only DHCP aralığının (192.168.56.101-254) ve node IP'lerinin dışında.
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: default
+  namespace: metallb-system
+spec:
+  addresses:
+    - 192.168.56.50-192.168.56.59
