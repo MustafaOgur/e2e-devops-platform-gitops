@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: mustafaoqr/todo-backend:10a1804
+          image: mustafaoqr/todo-backend:6f2553e
           ports:
             - name: http
               containerPort: 8000
