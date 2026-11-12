@@ -51,6 +51,21 @@ grafana:
   # Kullanıcı adı ve şifre manifests/grafana-admin-sealedsecret.yaml'dan gelir
   admin:
     existingSecret: grafana-admin
+
+  # http://grafana.test → Grafana arayüzü
+  route:
+    main:
+      enabled: true
+      hostnames:
+        - grafana.test
+      parentRefs:
+        - name: main
+          namespace: traefik
+  # Grafana'nın ürettiği bağlantılar (yönlendirmeler, paylaşım linkleri) bu adresi kullanır
+  grafana.ini:
+    server:
+      root_url: http://grafana.test
+
   resources:
     requests:
       cpu: 50m
