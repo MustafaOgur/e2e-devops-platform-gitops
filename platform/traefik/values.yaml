@@ -26,6 +26,19 @@ service:
   annotations:
     metallb.io/loadBalancerIPs: 192.168.56.50
 
+# Prometheus metrikleri: Gateway'den geçen her isteğin sayısı ve süresi, hedef servise göre
+# (app-frontend-80, app-backend-8000...). Frontend trafiği buradan izlenir.
+metrics:
+  prometheus:
+    # Metrik portu (9100) için ayrı bir Service; dışarıya açılmaz
+    service:
+      enabled: true
+    serviceMonitor:
+      enabled: true
+    # Chart, ServiceMonitor CRD'si yoksa hata verir. Sıfırdan kurulumda CRD'ler monitoring
+    # uygulamasıyla gelir; kontrol kapatılır, uygulamadaki retry CRD oluşana kadar dener
+    disableAPICheck: true
+
 resources:
   requests:
     cpu: 50m
