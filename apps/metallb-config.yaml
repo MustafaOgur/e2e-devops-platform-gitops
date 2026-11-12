@@ -1,0 +1,29 @@
+# MetalLB IP havuzu ve L2 duyurusu. Kaynak türleri MetalLB chart'ındaki CRD'lerle gelir.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: metallb-config
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/MustafaOgur/e2e-devops-platform-gitops.git
+    targetRevision: main
+    path: platform/metallb/config
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: metallb-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      # CRD'ler henüz yoksa kuru çalıştırma hatası verip durmasın
+      - SkipDryRunOnMissingResource=true
+    # MetalLB henüz kurulmadıysa yeniden denenir
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m

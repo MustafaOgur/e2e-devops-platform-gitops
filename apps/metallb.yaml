@@ -1,0 +1,43 @@
+# MetalLB: LoadBalancer Service'lerine host-only ağından IP verir
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: metallb
+  namespace: argocd
+  annotations:
+    # IP havuzu tanımlarından (metallb-config) önce, CRD'ler oluşsun diye
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  project: default
+  sources:
+    - repoURL: https://metallb.github.io/metallb
+      chart: metallb
+      targetRevision: 0.16.2
+      helm:
+        releaseName: metallb
+        valueFiles:
+          - $values/platform/metallb/values.yaml
+    - repoURL: https://github.com/MustafaOgur/e2e-devops-platform-gitops.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: metallb-system
+  # MetalLB webhook sertifikasını kurulumdan sonra kendisi üretip bu alanlara yazar;
+  # Git'te olmadığı için ArgoCD bu alanları karşılaştırmaz ve üzerine yazmaz
+  ignoreDifferences:
+    - group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+      jqPathExpressions:
+        - .webhooks[]?.clientConfig.caBundle
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+      jqPathExpressions:
+        - .spec.conversion.webhook.clientConfig.caBundle
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - RespectIgnoreDifferences=true
