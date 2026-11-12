@@ -66,12 +66,13 @@ grafana:
     server:
       root_url: http://grafana.test
 
+  # 256Mi sınırında açılışta OOMKilled oluyordu (Grafana 13 arama indeksini bellekte kurar)
   resources:
     requests:
       cpu: 50m
-      memory: 128Mi
-    limits:
       memory: 256Mi
+    limits:
+      memory: 512Mi
 
 prometheusOperator:
   resources:
