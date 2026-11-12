@@ -10,8 +10,8 @@ metadata:
     app.kubernetes.io/component: web
     app.kubernetes.io/part-of: todo
 data:
-  # Dış erişim kurulana kadar port-forward ile test edilir
+  # Boş adres: API, sayfanın açıldığı adresten (todo.test/api) çağrılır; HTTPRoute backend'e yönlendirir
   config.js: |
     window.APP_CONFIG = {
-      API_URL: "http://localhost:8000",
+      API_URL: "",
     };

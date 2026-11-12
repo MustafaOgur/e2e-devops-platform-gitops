@@ -1,0 +1,30 @@
+# Traefik: Gateway API controller'ı ve cluster'ın tek giriş noktası (192.168.56.50)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: traefik
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://traefik.github.io/charts
+      chart: traefik
+      targetRevision: 42.3.2
+      helm:
+        releaseName: traefik
+        # Traefik'e özel CRD'ler kullanılmıyor; Gateway API CRD'lerini k3s kuruyor
+        skipCrds: true
+        valueFiles:
+          - $values/platform/traefik/values.yaml
+    - repoURL: https://github.com/MustafaOgur/e2e-devops-platform-gitops.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: traefik
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

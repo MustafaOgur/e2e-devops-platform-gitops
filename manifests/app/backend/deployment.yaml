@@ -17,6 +17,10 @@ spec:
       app.kubernetes.io/name: backend
   template:
     metadata:
+      annotations:
+        # ConfigMap ortam değişkenleri pod başlarken okunur;
+        # bu değeri artırmak yeni pod'ların oluşturulmasını sağlar
+        todo.app/config-revision: "2"
       labels:
         app.kubernetes.io/name: backend
         app.kubernetes.io/component: api
