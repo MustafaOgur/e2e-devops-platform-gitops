@@ -1,0 +1,148 @@
+# Traefik (giriş noktası) dashboard'u: dışarıdan gelen trafiğin hedefe göre dağılımı.
+# Frontend'in kendi metriği yok; frontend trafiği buradan izlenir.
+#
+# Traefik, Gateway API rotalarının hedeflerini uzun adlarla etiketler:
+#   httproute-app-todo-gw-traefik-main-ep-web-1-<hash>-svc-app-frontend-0@kubernetesgateway
+# label_replace bunu "app-frontend" gibi kısa bir "target" etiketine çevirir.
+# Prometheus, Traefik'in "service" etiketini kendi "service" (traefik-metrics) etiketiyle
+# çakıştığı için "exported_service" olarak saklar.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traefik-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  traefik.json: |
+    {
+      "uid": "todo-traefik",
+      "title": "Todo / Traefik",
+      "tags": ["todo", "traefik"],
+      "timezone": "browser",
+      "refresh": "30s",
+      "time": { "from": "now-1h", "to": "now" },
+      "schemaVersion": 39,
+      "panels": [
+        {
+          "type": "stat",
+          "title": "Requests / sec (all)",
+          "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": { "defaults": { "unit": "reqps", "decimals": 2 } },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum(rate(traefik_entrypoint_requests_total{entrypoint=\"web\"}[$__rate_interval]))"
+            }
+          ]
+        },
+        {
+          "type": "stat",
+          "title": "Frontend requests / sec",
+          "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": { "defaults": { "unit": "reqps", "decimals": 2 } },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum(rate(traefik_service_requests_total{exported_service=~\".*-svc-app-frontend-.*\"}[$__rate_interval]))"
+            }
+          ]
+        },
+        {
+          "type": "stat",
+          "title": "5xx error rate (all)",
+          "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit",
+              "decimals": 2,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 0.01 },
+                  { "color": "red", "value": 0.05 }
+                ]
+              }
+            }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "(sum(rate(traefik_entrypoint_requests_total{entrypoint=\"web\", code=~\"5..\"}[$__rate_interval])) or vector(0)) / sum(rate(traefik_entrypoint_requests_total{entrypoint=\"web\"}[$__rate_interval]))"
+            }
+          ]
+        },
+        {
+          "type": "stat",
+          "title": "Open connections",
+          "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum(traefik_open_connections{entrypoint=\"web\"})"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Requests / sec by target",
+          "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": { "defaults": { "unit": "reqps" } },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "label_replace(sum by (exported_service) (rate(traefik_service_requests_total[$__rate_interval])), \"target\", \"$1\", \"exported_service\", \".*-svc-(.+)-[0-9]+@.*\")",
+              "legendFormat": "{{target}}"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Requests / sec by target and status",
+          "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": { "defaults": { "unit": "reqps" } },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "label_replace(sum by (exported_service, code) (rate(traefik_service_requests_total[$__rate_interval])), \"target\", \"$1\", \"exported_service\", \".*-svc-(.+)-[0-9]+@.*\")",
+              "legendFormat": "{{target}} {{code}}"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Average latency by target",
+          "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": { "defaults": { "unit": "s" } },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "label_replace(sum by (exported_service) (rate(traefik_service_request_duration_seconds_sum[$__rate_interval])) / sum by (exported_service) (rate(traefik_service_request_duration_seconds_count[$__rate_interval])), \"target\", \"$1\", \"exported_service\", \".*-svc-(.+)-[0-9]+@.*\")",
+              "legendFormat": "{{target}}"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Response bytes / sec by target",
+          "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": { "defaults": { "unit": "Bps" } },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "label_replace(sum by (exported_service) (rate(traefik_service_responses_bytes_total[$__rate_interval])), \"target\", \"$1\", \"exported_service\", \".*-svc-(.+)-[0-9]+@.*\")",
+              "legendFormat": "{{target}}"
+            }
+          ]
+        }
+      ]
+    }
