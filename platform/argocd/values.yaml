@@ -16,12 +16,14 @@ notifications:
   enabled: false
 
 controller:
+  # Controller izlediği tüm kaynakları bellekte tutar; kube-prometheus-stack'in büyük CRD'leri
+  # ve ~100 kaynağı eklenince 512Mi sınırında OOMKilled oluyordu
   resources:
     requests:
       cpu: 100m
-      memory: 256Mi
-    limits:
       memory: 512Mi
+    limits:
+      memory: 1Gi
 
 server:
   # http://argocd.test → argocd-server (Gateway API rotası)
