@@ -66,6 +66,12 @@ grafana:
     server:
       root_url: http://grafana.test
 
+  # Alertmanager kapalı; chart'ın eklediği Alertmanager datasource'u Grafana'da hata veriyordu
+  sidecar:
+    datasources:
+      alertmanager:
+        enabled: false
+
   # 256Mi sınırında açılışta OOMKilled oluyordu (Grafana 13 arama indeksini bellekte kurar)
   resources:
     requests:
