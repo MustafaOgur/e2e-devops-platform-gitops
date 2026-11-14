@@ -1,4 +1,4 @@
-# Loglar: Loki (log veritabanı)
+# Loglar: Loki (log veritabanı) + Alloy (her node'da pod loglarını okuyup Loki'ye gönderen ajan)
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -13,7 +13,14 @@ spec:
       helm:
         releaseName: loki
         valueFiles:
-          - $values/platform/logging/values.yaml
+          - $values/platform/logging/loki-values.yaml
+    - repoURL: https://grafana.github.io/helm-charts
+      chart: alloy
+      targetRevision: 1.16.0
+      helm:
+        releaseName: alloy
+        valueFiles:
+          - $values/platform/logging/alloy-values.yaml
     - repoURL: https://github.com/MustafaOgur/e2e-devops-platform-gitops.git
       targetRevision: main
       ref: values
