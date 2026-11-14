@@ -143,6 +143,26 @@ data:
               "legendFormat": "{{target}}"
             }
           ]
+        },
+        {
+          "type": "logs",
+          "title": "Failed requests at the edge (logs)",
+          "description": "Traefik access log, only status 4xx/5xx. Includes errors that never reach the app, e.g. 503 when no pod is ready or 404 when no route matches.",
+          "gridPos": { "x": 0, "y": 20, "w": 24, "h": 10 },
+          "datasource": { "type": "loki", "uid": "loki" },
+          "options": {
+            "showTime": true,
+            "wrapLogMessage": true,
+            "sortOrder": "Descending",
+            "enableLogDetails": true,
+            "dedupStrategy": "none"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "{namespace=\"traefik\", app=\"traefik\"} |= \"DownstreamStatus\" | json | DownstreamStatus >= 400"
+            }
+          ]
         }
       ]
     }
