@@ -39,6 +39,19 @@ metrics:
     # uygulamasıyla gelir; kontrol kapatılır, uygulamadaki retry CRD oluşana kadar dener
     disableAPICheck: true
 
+# Loglar JSON; Loki'de "| json" ile alanlarına ayrılır
+log:
+  format: json
+
+# Erişim logu: sadece başarısız istekler (4xx/5xx). Başarılı istekler backend ve frontend (nginx)
+# tarafından zaten loglanıyor; hepsini burada da yazmak her isteği iki kez kaydetmek olurdu.
+# Header'lar varsayılan olarak loglanmaz (Authorization, çerezler).
+accessLog:
+  enabled: true
+  format: json
+  filters:
+    statusCodes: "400-599"
+
 resources:
   requests:
     cpu: 50m

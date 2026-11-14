@@ -1,0 +1,81 @@
+# Loki Helm chart (grafana-community/loki) ayarları.
+# Küçük bir lab cluster'ı için: tek pod, loglar yerel diskte, kısa saklama süresi.
+
+# Bütün Loki bileşenleri (distributor, ingester, querier, compactor...) tek pod'da çalışır
+deploymentMode: Monolithic
+
+loki:
+  # Tek kiracı; Grafana ve Alloy X-Scope-OrgID başlığı göndermeden yazar ve okur
+  auth_enabled: false
+
+  commonConfig:
+    # Tek kopya; replika yok
+    replication_factor: 1
+
+  # Object storage (S3/MinIO) yerine pod'un diski (PVC)
+  storage:
+    type: filesystem
+
+  schemaConfig:
+    configs:
+      - from: "2024-04-01"
+        store: tsdb
+        object_store: filesystem
+        schema: v13
+        index:
+          prefix: loki_index_
+          period: 24h
+
+  # Prometheus ile aynı: 3 günden eski loglar compactor tarafından silinir
+  limits_config:
+    retention_period: 72h
+  compactor:
+    retention_enabled: true
+    delete_request_store: filesystem
+
+  # Grafana Labs'e kullanım istatistiği gönderilmez
+  analytics:
+    reporting_enabled: false
+
+singleBinary:
+  replicas: 1
+  # Loki'nin kendi alarm kurallarını ConfigMap'lerden yükleyen sidecar; kural kullanılmıyor
+  sidecar: false
+  persistence:
+    size: 2Gi
+    storageClass: local-path
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
+
+# Diğer kurulum modlarının (SimpleScalable) bileşenleri çalışmaz; chart aksi halde hata verir
+backend:
+  replicas: 0
+read:
+  replicas: 0
+write:
+  replicas: 0
+
+# Tek pod olduğu için önündeki nginx gateway'e gerek yok; Grafana ve Alloy doğrudan Loki Service'ine bağlanır
+gateway:
+  enabled: false
+
+# Sorgu önbellekleri (memcached) ayrı pod'lar ve yüzlerce MB RAM demek; bu log hacminde gerekmiyor
+chunksCache:
+  enabled: false
+resultsCache:
+  enabled: false
+
+# Test amaçlı sahte log üreten canary ve Helm test pod'ları
+lokiCanary:
+  enabled: false
+test:
+  enabled: false
+
+monitoring:
+  # Loki'nin kendi metrikleri Prometheus'a gitsin
+  serviceMonitor:
+    enabled: true

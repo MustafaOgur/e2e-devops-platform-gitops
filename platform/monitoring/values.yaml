@@ -72,6 +72,23 @@ grafana:
       alertmanager:
         enabled: false
 
+  # Loglar: logging namespace'indeki Loki (Prometheus datasource'unu chart kendisi ekler)
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      uid: loki
+      url: http://loki.logging.svc.cluster.local:3100
+      access: proxy
+      jsonData:
+        maxLines: 1000
+        # Backend loglarındaki trace_id tıklanabilir olur; aynı isteğin bütün log satırlarını açar
+        derivedFields:
+          - name: trace_id
+            matcherRegex: '"trace_id": "(\w+)"'
+            url: '{namespace="app"} |= "$${__value.raw}"'
+            datasourceUid: loki
+            urlDisplayLabel: Bu isteğin tüm logları
+
   # 256Mi sınırında açılışta OOMKilled oluyordu (Grafana 13 arama indeksini bellekte kurar)
   resources:
     requests:
