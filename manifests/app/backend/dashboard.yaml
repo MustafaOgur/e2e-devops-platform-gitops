@@ -175,6 +175,26 @@ data:
               "legendFormat": "{{method}} {{path}}"
             }
           ]
+        },
+        {
+          "type": "logs",
+          "title": "Errors and failed requests (logs)",
+          "description": "ERROR/WARNING logs and requests with status >= 400. trace_id opens all logs of the same request. Panel menu > Explore shows all backend logs.",
+          "gridPos": { "x": 0, "y": 20, "w": 24, "h": 10 },
+          "datasource": { "type": "loki", "uid": "loki" },
+          "options": {
+            "showTime": true,
+            "wrapLogMessage": true,
+            "sortOrder": "Descending",
+            "enableLogDetails": true,
+            "dedupStrategy": "none"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "{namespace=\"app\", app=\"backend\"} | json | level=~\"ERROR|WARNING\" or status >= 400"
+            }
+          ]
         }
       ]
     }
