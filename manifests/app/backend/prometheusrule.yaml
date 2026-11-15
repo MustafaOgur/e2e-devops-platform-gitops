@@ -1,0 +1,53 @@
+# Backend alarm kuralları. Prometheus kuralları 30 saniyede bir değerlendirir;
+# koşul "for" süresi boyunca doğru kalırsa alarm Firing olur ve Grafana > Alerting'de görünür.
+# Alertmanager kapalı olduğu için bildirim gönderilmez (production'da Slack/PagerDuty'ye yönlendirilir).
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: backend
+  namespace: app
+  labels:
+    app.kubernetes.io/name: backend
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: todo
+  annotations:
+    # Sıfırdan kurulumda PrometheusRule CRD'si henüz yoksa diğer kaynakların senkronizasyonu engellenmez
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  groups:
+    - name: backend
+      rules:
+        # Hiçbir backend pod'u Prometheus'a cevap vermiyor: uygulama tamamen erişilemez
+        - alert: BackendDown
+          expr: absent(up{job="backend"} == 1)
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: Backend is down
+            description: No backend pod has been reachable by Prometheus for 2 minutes.
+
+        # İsteklerin %5'inden fazlası 5xx ile dönüyor (dashboard'daki 5xx panelinin kırmızı eşiği)
+        - alert: BackendHighErrorRate
+          expr: |
+            sum(rate(http_requests_total{job="backend", status=~"5.."}[5m]))
+              / sum(rate(http_requests_total{job="backend"}[5m]))
+              > 0.05
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: Backend 5xx error rate is above 5%
+            description: '{{ $value | humanizePercentage }} of backend requests failed with 5xx in the last 5 minutes.'
+
+        # İsteklerin %95'i 1 saniyeden uzun sürüyor (dashboard'daki p95 panelinin kırmızı eşiği)
+        - alert: BackendHighLatency
+          expr: |
+            histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{job="backend"}[5m])))
+              > 1
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: Backend p95 latency is above 1s
+            description: 'p95 latency is {{ $value | humanizeDuration }} over the last 5 minutes.'

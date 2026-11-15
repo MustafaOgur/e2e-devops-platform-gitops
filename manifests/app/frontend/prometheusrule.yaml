@@ -1,0 +1,29 @@
+# Frontend alarm kuralı. Frontend /metrics sunmadığı için durumu kube-state-metrics'ten okunur
+# (Kubernetes'in Deployment bilgisi). Kullanıcıya dönen hatalar Traefik kuralında izlenir
+# (platform/monitoring/manifests/traefik-rules.yaml).
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: frontend
+  namespace: app
+  labels:
+    app.kubernetes.io/name: frontend
+    app.kubernetes.io/component: web
+    app.kubernetes.io/part-of: todo
+  annotations:
+    # Sıfırdan kurulumda PrometheusRule CRD'si henüz yoksa diğer kaynakların senkronizasyonu engellenmez
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  groups:
+    - name: frontend
+      rules:
+        # Hazır frontend pod'u yok: arayüz açılmaz.
+        # Hazır kural KubeDeploymentReplicasMismatch 15 dakika bekler ve kısmi eksikliği de kapsar
+        - alert: FrontendDown
+          expr: kube_deployment_status_replicas_available{namespace="app", deployment="frontend"} < 1
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: Frontend is down
+            description: The frontend Deployment has had no available pods for 2 minutes.
