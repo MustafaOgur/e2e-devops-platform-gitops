@@ -1,0 +1,23 @@
+# Giriş noktası (Traefik) alarm kuralı: kullanıcının gördüğü hatalar.
+# Backend'in 5xx'lerinin yanında uygulamaya hiç ulaşmayan hataları da kapsar
+# (pod yokken 503 "no available server", 502 bad gateway).
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: traefik
+  namespace: monitoring
+spec:
+  groups:
+    - name: traefik
+      rules:
+        - alert: EdgeHighErrorRate
+          expr: |
+            sum(rate(traefik_entrypoint_requests_total{entrypoint="web", code=~"5.."}[5m]))
+              / sum(rate(traefik_entrypoint_requests_total{entrypoint="web"}[5m]))
+              > 0.05
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: More than 5% of requests at the edge return 5xx
+            description: '{{ $value | humanizePercentage }} of requests through Traefik failed with 5xx in the last 5 minutes.'

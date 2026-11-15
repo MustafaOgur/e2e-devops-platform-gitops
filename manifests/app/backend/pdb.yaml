@@ -1,0 +1,17 @@
+# Gönüllü kesintilerde (kubectl drain, node bakımı) en az bir backend pod'u ayakta kalır.
+# Tahliye bu sayının altına düşürecekse drain bekler. Node çökmesine karşı koruma sağlamaz.
+# Not: Tek worker'lı lab'da yeni pod'un gidecek yeri olmadığı için drain'i bilerek durdurur.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: backend
+  namespace: app
+  labels:
+    app.kubernetes.io/name: backend
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: todo
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: backend

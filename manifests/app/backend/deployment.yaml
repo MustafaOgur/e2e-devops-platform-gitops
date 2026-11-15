@@ -11,7 +11,8 @@ metadata:
     app.kubernetes.io/component: api
     app.kubernetes.io/part-of: todo
 spec:
-  replicas: 2
+  # replicas yok: pod sayısını HPA (hpa.yaml) yönetir. Burada yazılsaydı ArgoCD her
+  # senkronizasyonda HPA'nın kararını geri alırdı
   selector:
     matchLabels:
       app.kubernetes.io/name: backend

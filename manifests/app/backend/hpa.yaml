@@ -1,0 +1,36 @@
+# Backend pod sayısını CPU kullanımına göre 2 ile 3 arasında ayarlar.
+# Kullanım, pod'ların CPU request'ine (100m) göre hesaplanır; değerleri metrics-server sağlar.
+# Pod sayısını artık HPA yönetir; deployment.yaml'da replicas yazılmaz.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: backend
+  namespace: app
+  labels:
+    app.kubernetes.io/name: backend
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: todo
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: backend
+  # En az 2: tek pod düşünce de hizmet sürer (PDB ile uyumlu).
+  # En fazla 3: worker node'un RAM'i sınırlı
+  minReplicas: 2
+  maxReplicas: 3
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+  behavior:
+    # Yük kısa süreli düşünce hemen küçülmesin; 5 dakika düşük kalırsa bir pod kapatılır
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 60
