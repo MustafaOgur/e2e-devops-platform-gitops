@@ -1,0 +1,16 @@
+# Gönüllü kesintilerde (kubectl drain, node bakımı) en az bir frontend pod'u ayakta kalır.
+# Ayrıntılar için backend/pdb.yaml'a bakın.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: frontend
+  namespace: app
+  labels:
+    app.kubernetes.io/name: frontend
+    app.kubernetes.io/component: web
+    app.kubernetes.io/part-of: todo
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: frontend
