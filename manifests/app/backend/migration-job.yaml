@@ -27,7 +27,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: migrate
-          image: mustafaoqr/todo-backend:6f2553e
+          image: mustafaoqr/todo-backend:9f45fcb
           command: ["alembic", "upgrade", "head"]
           envFrom:
             - secretRef:
